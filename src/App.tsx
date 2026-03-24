@@ -389,7 +389,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
 
           {/* Calendar Body */}
           <div
-            className="flex-1 flex flex-col border-t border-l rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm min-h-0"
+            className="flex-1 flex flex-col border rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm min-h-0"
             style={{ borderColor: theme.cellBorder }}
           >
             {rows}
