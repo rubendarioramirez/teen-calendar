@@ -461,7 +461,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
         {modalOpen && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
             <div
-              className="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
+              className="w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden"
               style={{ backgroundColor: theme.modalBg, border: `1px solid ${theme.cellBorder}` }}
             >
               <div className="flex justify-between items-center p-6 border-b" style={{ borderColor: theme.cellBorder }}>
