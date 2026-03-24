@@ -283,7 +283,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
             <button onClick={prevMonth} className="p-2 rounded-full hover:bg-white/10 transition-colors">
               <ChevronLeft size={24} />
             </button>
-            <h1 className="text-4xl font-black tracking-wider uppercase" style={{ color: theme.headerText }}>
+            <h1 className="text-4xl font-black tracking-wider uppercase" style={{ color: theme.headerText, fontFamily: 'Champagne, sans-serif' }}>
               {format(currentDate, 'MMMM')}
             </h1>
             <button onClick={nextMonth} className="p-2 rounded-full hover:bg-white/10 transition-colors">

@@ -52,7 +52,7 @@ export function WeekView({ weekStart, events, onBack, onEditEvent }: Props) {
           >
             Week
           </p>
-          <p className="text-4xl font-black leading-none" style={{ color: theme.accent }}>
+          <p className="text-4xl font-black leading-none" style={{ color: theme.accent, fontFamily: 'Champagne, sans-serif' }}>
             {weekNumber}
           </p>
         </div>

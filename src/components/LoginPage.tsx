@@ -14,7 +14,7 @@ export function LoginPage({ onSignIn, error }: Props) {
       <div className="text-center space-y-3">
         <h1
           className="text-5xl font-black tracking-wider uppercase"
-          style={{ color: theme.headerText }}
+          style={{ color: theme.headerText, fontFamily: 'Champagne, sans-serif' }}
         >
           Matilda's Calendar
         </h1>
