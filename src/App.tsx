@@ -267,7 +267,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
       />
 
       {/* Main Calendar Area */}
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
         {view === 'week' && (
           <WeekView
             weekStart={startOfWeek(currentDate, { weekStartsOn: 0 })}
@@ -278,7 +278,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
         )}
         {view === 'month' && <>
         {/* Header */}
-        <header className="flex items-center justify-between p-6 border-b" style={{ borderColor: theme.cellBorder }}>
+        <header className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0" style={{ borderColor: theme.cellBorder }}>
           <div className="flex items-center space-x-4">
             <button onClick={prevMonth} className="p-2 rounded-full hover:bg-white/10 transition-colors">
               <ChevronLeft size={24} />
@@ -364,7 +364,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
         {/* Calendar Grid */}
         <div
           ref={calendarRef}
-          className="flex-1 flex flex-col p-6 overflow-hidden relative"
+          className="flex-1 flex flex-col p-3 overflow-hidden relative min-h-0"
           onClick={handleCalendarClick}
           style={{ cursor: selectedSticker ? 'crosshair' : 'default' }}
         >
@@ -389,7 +389,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
 
           {/* Calendar Body */}
           <div
-            className="flex-1 flex flex-col border-t border-l rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm"
+            className="flex-1 flex flex-col border-t border-l rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm min-h-0"
             style={{ borderColor: theme.cellBorder }}
           >
             {rows}
