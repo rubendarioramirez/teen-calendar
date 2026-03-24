@@ -32,7 +32,7 @@ export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleS
 
   return (
     <aside
-      className="w-64 flex-shrink-0 p-6 flex flex-col border-r backdrop-blur-md"
+      className="w-64 flex-shrink-0 p-4 flex flex-col border-r backdrop-blur-md h-screen overflow-hidden"
       style={{ backgroundColor: theme.sidebarBg, borderColor: theme.cellBorder }}
     >
       <h2
@@ -45,7 +45,7 @@ export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleS
       {/* School events toggle */}
       <button
         onClick={onToggleSchool}
-        className="flex items-center gap-2 mt-3 mb-4 text-xs font-semibold uppercase tracking-wider transition-opacity hover:opacity-80"
+        className="flex items-center gap-2 mt-2 mb-3 text-xs font-semibold uppercase tracking-wider transition-opacity hover:opacity-80"
         style={{ color: showSchool ? theme.sticker : theme.textSecondary }}
       >
         <span
@@ -104,7 +104,7 @@ export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleS
         )}
       </div>
 
-      <div className="mt-auto pt-6">
+      <div className="mt-auto pt-3">
         <button
           onClick={onAddEvent}
           className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105 active:scale-95"
