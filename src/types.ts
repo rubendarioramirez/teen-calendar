@@ -19,6 +19,7 @@ export type PlacedSticker = {
   y: number;
   size: number;
   rotation: number;
+  month: string; // 'yyyy-MM'
 };
 
 export const emptyForm = {

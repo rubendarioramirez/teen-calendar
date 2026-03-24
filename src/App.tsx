@@ -76,6 +76,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
       y: e.clientY - rect.top - size / 2,
       size,
       rotation: Math.random() * 20 - 10,
+      month: format(currentDate, 'yyyy-MM'),
     });
   };
 
@@ -369,7 +370,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
           style={{ cursor: selectedSticker ? 'crosshair' : 'default' }}
         >
           <StickerLayer
-            stickers={stickers}
+            stickers={stickers.filter((s) => (s.month ?? format(currentDate, 'yyyy-MM')) === format(currentDate, 'yyyy-MM'))}
             onMove={moveSticker}
             onRemove={removeSticker}
             onDragStart={() => { stickerJustDragged.current = true; }}
