@@ -532,8 +532,8 @@ export default function App({ uid, onSignOut: signOut }: Props) {
                   />
                 </div>
 
-                <div className="flex gap-3">
-                  <div className="flex-1">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>Start time</label>
                     <input
                       type="time"
@@ -543,7 +543,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
                       style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}`, colorScheme: 'dark' }}
                     />
                   </div>
-                  <div className="flex-1">
+                  <div>
                     <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
                       End time <span className="opacity-50">(optional)</span>
                     </label>
