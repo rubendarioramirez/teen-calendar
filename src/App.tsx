@@ -13,35 +13,46 @@ import {
   getWeek,
   isWithinInterval,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, Smile, X, Trash2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Smile, X, Trash2, LogOut } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { theme, PALETTE } from './theme';
-import { type Event, type PlacedSticker, emptyForm } from './types';
+import { type Event, emptyForm } from './types';
 import { expandEvents, originalId } from './utils/expandEvents';
 import { Sidebar } from './components/Sidebar';
 import { WeekView } from './components/WeekView';
 import { StickerPicker } from './components/StickerPicker';
 import { StickerLayer } from './components/StickerLayer';
 import { IconPicker } from './components/IconPicker';
+import { useCalendarData } from './hooks/useCalendarData';
+import { useAuth } from './hooks/useAuth';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export default function App() {
+  const {
+    events,
+    stickers,
+    cellColors,
+    completedDays,
+    addEvent,
+    updateEvent,
+    deleteEvent,
+    addSticker,
+    moveSticker,
+    removeSticker,
+    setCellColor,
+    toggleDayCompletion,
+  } = useCalendarData();
+
+  const { signOut } = useAuth();
+
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [events, setEvents] = useState<Event[]>([
-    { id: '1', date: new Date(), title: 'Math hw' },
-    { id: '2', date: addDays(new Date(), 3), title: 'Danish presentation' },
-    { id: '3', date: addDays(new Date(), -2), title: 'Bring a calculator' },
-  ]);
-  const [completedDays, setCompletedDays] = useState<Record<string, boolean>>({});
-  const [cellColors, setCellColors] = useState<Record<string, string>>({});
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [view, setView] = useState<'month' | 'week'>('month');
   const [showSchool, setShowSchool] = useState(true);
-  const [stickers, setStickers] = useState<PlacedSticker[]>([]);
   const [selectedSticker, setSelectedSticker] = useState<string | null>(null);
   const calendarRef = useRef<HTMLDivElement>(null);
   const stickerJustDragged = useRef(false);
@@ -57,25 +68,13 @@ export default function App() {
     if (!selectedSticker || !calendarRef.current) return;
     const rect = calendarRef.current.getBoundingClientRect();
     const size = 90;
-    setStickers((prev) => [...prev, {
-      id: Math.random().toString(36).slice(2),
+    addSticker({
       src: selectedSticker,
       x: e.clientX - rect.left - size / 2,
       y: e.clientY - rect.top - size / 2,
       size,
       rotation: Math.random() * 20 - 10,
-    }]);
-  };
-
-  const moveSticker = (id: string, x: number, y: number) =>
-    setStickers((prev) => prev.map((s) => s.id === id ? { ...s, x, y } : s));
-
-  const removeSticker = (id: string) =>
-    setStickers((prev) => prev.filter((s) => s.id !== id));
-
-  const toggleDayCompletion = (date: Date) => {
-    const dateStr = format(date, 'yyyy-MM-dd');
-    setCompletedDays((prev) => ({ ...prev, [dateStr]: !prev[dateStr] }));
+    });
   };
 
   const openNew = () => {
@@ -109,30 +108,26 @@ export default function App() {
     if (!form.title.trim() || !form.date) return;
     const [year, month, day] = form.date.split('-').map(Number);
     const date = new Date(year, month - 1, day);
+    const payload = {
+      title: form.title,
+      date,
+      startTime: form.startTime || undefined,
+      endTime: form.endTime || undefined,
+      color: form.color || undefined,
+      icon: form.icon || undefined,
+      isSchool: form.isSchool || undefined,
+      repeat: form.repeat !== 'none' ? form.repeat : undefined,
+    };
     if (editingId) {
-      setEvents((prev) => prev.map((ev) =>
-        ev.id === editingId
-          ? { ...ev, title: form.title, date, startTime: form.startTime || undefined, endTime: form.endTime || undefined, color: form.color || undefined, icon: form.icon || undefined, isSchool: form.isSchool, repeat: form.repeat !== 'none' ? form.repeat : undefined }
-          : ev
-      ));
+      updateEvent(editingId, payload);
     } else {
-      setEvents((prev) => [...prev, {
-        id: Math.random().toString(36).substr(2, 9),
-        date,
-        title: form.title,
-        startTime: form.startTime || undefined,
-        endTime: form.endTime || undefined,
-        color: form.color || undefined,
-        icon: form.icon || undefined,
-        isSchool: form.isSchool || undefined,
-        repeat: form.repeat !== 'none' ? form.repeat : undefined,
-      }]);
+      addEvent(payload);
     }
     closeModal();
   };
 
   const handleDelete = () => {
-    if (editingId) setEvents((prev) => prev.filter((ev) => ev.id !== editingId));
+    if (editingId) deleteEvent(editingId);
     closeModal();
   };
 
@@ -170,11 +165,7 @@ export default function App() {
           key={day.toString()}
           onClick={() => {
             if (selectedColor) {
-              setCellColors((prev) =>
-                prev[dateStr] === selectedColor
-                  ? { ...prev, [dateStr]: '' }
-                  : { ...prev, [dateStr]: selectedColor }
-              );
+              setCellColor(dateStr, cellColors[dateStr] === selectedColor ? '' : selectedColor);
             }
           }}
           className={cn(
@@ -195,7 +186,7 @@ export default function App() {
               {formattedDate}
             </span>
             <button
-              onClick={() => toggleDayCompletion(cloneDay)}
+              onClick={() => toggleDayCompletion(dateStr)}
               className="hover:scale-110 transition-transform focus:outline-none"
               title="Mark day as done!"
             >
@@ -354,6 +345,17 @@ export default function App() {
               selectedSticker={selectedSticker}
               onSelect={setSelectedSticker}
             />
+            <div
+              className="w-px self-stretch mx-1"
+              style={{ backgroundColor: theme.cellBorder }}
+            />
+            <button
+              onClick={signOut}
+              title="Sign out"
+              className="p-2 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <LogOut size={20} style={{ color: theme.textSecondary }} />
+            </button>
           </div>
         </header>
 
