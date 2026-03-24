@@ -10,6 +10,7 @@ export type Event = {
   icon?: string;
   isSchool?: boolean;
   repeat?: RepeatType;
+  notes?: string;
 };
 
 export type PlacedSticker = {
@@ -31,4 +32,5 @@ export const emptyForm = {
   icon: '',
   isSchool: false,
   repeat: 'none' as RepeatType,
+  notes: '',
 };

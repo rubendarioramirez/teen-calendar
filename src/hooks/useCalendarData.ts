@@ -23,6 +23,7 @@ interface EventDoc {
   icon?: string;
   isSchool?: boolean;
   repeat?: RepeatType;
+  notes?: string;
 }
 
 interface StickerDoc {
@@ -82,6 +83,7 @@ export function useCalendarData(uid: string) {
             icon: data.icon,
             isSchool: data.isSchool,
             repeat: data.repeat,
+            notes: data.notes,
           };
         }),
       );
@@ -131,6 +133,7 @@ export function useCalendarData(uid: string) {
       ...(ev.icon && { icon: ev.icon }),
       ...(ev.isSchool && { isSchool: ev.isSchool }),
       ...(ev.repeat && ev.repeat !== 'none' && { repeat: ev.repeat }),
+      ...(ev.notes && { notes: ev.notes }),
     };
     await addDoc(userCol(uid, 'events'), data);
   }, [uid]);
@@ -145,6 +148,7 @@ export function useCalendarData(uid: string) {
       icon: ev.icon ?? '',
       isSchool: ev.isSchool ?? false,
       repeat: ev.repeat ?? 'none',
+      notes: ev.notes ?? '',
     };
     await updateDoc(userDoc(uid, 'events', id), data as Record<string, unknown>);
   }, [uid]);

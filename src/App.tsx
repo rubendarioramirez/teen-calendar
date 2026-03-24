@@ -118,6 +118,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
       icon: original.icon || '',
       isSchool: original.isSchool ?? false,
       repeat: original.repeat ?? 'none',
+      notes: original.notes || '',
     });
     setModalOpen(true);
   };
@@ -138,6 +139,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
       icon: form.icon || undefined,
       isSchool: form.isSchool || undefined,
       repeat: form.repeat !== 'none' ? form.repeat : undefined,
+      notes: form.notes || undefined,
     };
     if (editingId) {
       updateEvent(editingId, payload);
@@ -486,6 +488,20 @@ export default function App({ uid, onSignOut: signOut }: Props) {
                     onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                     placeholder="e.g. Math homework"
                     className="w-full px-4 py-3 rounded-xl outline-none transition-shadow"
+                    style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}` }}
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
+                    Notes <span className="opacity-50">(optional)</span>
+                  </label>
+                  <textarea
+                    value={form.notes}
+                    onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
+                    placeholder="Any extra details..."
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl outline-none resize-none"
                     style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}` }}
                   />
                 </div>
