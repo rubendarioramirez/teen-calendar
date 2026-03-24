@@ -165,7 +165,7 @@ export function WeekView({ weekStart, events, onBack, onEditEvent }: Props) {
                 {/* Timed events */}
                 {timed.map((event) => {
                   const start = parseHours(event.startTime!);
-                  const end = event.endTime ? parseHours(event.endTime) : start + 0.5;
+                  const end = event.endTime ? parseHours(event.endTime) : start + 1;
                   const top = (start - HOURS[0]) * SLOT_H;
                   const height = Math.max((end - start) * SLOT_H, 24);
 
