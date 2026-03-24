@@ -252,7 +252,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
 
   return (
     <div 
-      className="h-screen overflow-hidden flex font-sans"
+      className="h-full overflow-hidden flex font-sans"
       style={{
         backgroundColor: theme.bg,
         color: theme.textPrimary
