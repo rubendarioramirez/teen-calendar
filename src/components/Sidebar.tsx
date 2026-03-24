@@ -32,7 +32,8 @@ export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleS
 
   return (
     <aside
-      className="w-64 flex-shrink-0 p-4 flex flex-col border-r backdrop-blur-md h-full overflow-hidden"
+      className="w-64 flex-shrink-0 p-4 grid border-r backdrop-blur-md h-full overflow-hidden"
+      style={{ gridTemplateRows: 'auto auto 1fr auto', backgroundColor: theme.sidebarBg, borderColor: theme.cellBorder }}
       style={{ backgroundColor: theme.sidebarBg, borderColor: theme.cellBorder }}
     >
       <h2
@@ -60,7 +61,7 @@ export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleS
         School events
       </button>
 
-      <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-5">
+      <div className="overflow-y-auto pr-2 custom-scrollbar space-y-5 min-h-0">
         {grouped.length === 0 ? (
           <p className="text-sm italic opacity-70">No events this week. Relax!</p>
         ) : (
@@ -104,7 +105,7 @@ export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleS
         )}
       </div>
 
-      <div className="mt-auto pt-3">
+      <div className="pt-3">
         <button
           onClick={onAddEvent}
           className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105 active:scale-95"

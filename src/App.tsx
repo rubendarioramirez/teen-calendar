@@ -231,7 +231,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
       day = addDays(day, 1);
     }
     rows.push(
-      <div className="grid grid-cols-7 flex-1 max-h-32" key={day.toString()}>
+      <div className="grid grid-cols-7 flex-1 max-h-[150px]" key={day.toString()}>
         {days}
       </div>
     );
@@ -389,7 +389,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
 
           {/* Calendar Body */}
           <div
-            className="flex flex-col border-t border-l rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm"
+            className="flex-1 flex flex-col border-t border-l rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm min-h-0"
             style={{ borderColor: theme.cellBorder }}
           >
             {rows}
