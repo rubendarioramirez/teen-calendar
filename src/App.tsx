@@ -171,7 +171,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
             }
           }}
           className={cn(
-            'relative flex flex-col p-2 border-r border-b transition-colors',
+            'relative flex flex-col p-2 border-r border-b transition-colors overflow-hidden',
             selectedColor ? 'cursor-pointer' : '',
             !isSameMonth(day, monthStart) ? 'opacity-50' : ''
           )}
@@ -231,7 +231,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
       day = addDays(day, 1);
     }
     rows.push(
-      <div className="grid grid-cols-7 flex-1" key={day.toString()}>
+      <div className="grid grid-cols-7 flex-1 max-h-32" key={day.toString()}>
         {days}
       </div>
     );
@@ -389,7 +389,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
 
           {/* Calendar Body */}
           <div
-            className="flex-1 flex flex-col border-t border-l rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm min-h-0"
+            className="flex flex-col border-t border-l rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm"
             style={{ borderColor: theme.cellBorder }}
           >
             {rows}
