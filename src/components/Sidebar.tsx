@@ -9,6 +9,9 @@ type Props = {
   onEditEvent: (event: Event) => void;
   showSchool: boolean;
   onToggleSchool: () => void;
+  selectedColor: string | null;
+  bgColor: string;
+  onColorClick: () => void;
 };
 
 const DAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -25,13 +28,18 @@ function groupByDay(events: Event[]): { day: string; events: Event[] }[] {
     .map(([day, events]) => ({ day, events }));
 }
 
-export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleSchool }: Props) {
+export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleSchool, selectedColor, bgColor, onColorClick }: Props) {
   const grouped = groupByDay(events);
 
   return (
     <aside
-      className="w-64 flex-shrink-0 flex flex-col border-r backdrop-blur-md h-full"
-      style={{ backgroundColor: theme.sidebarBg, borderColor: theme.cellBorder }}
+      className="w-64 flex-shrink-0 flex flex-col border-r backdrop-blur-md h-full transition-colors"
+      style={{
+        backgroundColor: bgColor || theme.sidebarBg,
+        borderColor: theme.cellBorder,
+        cursor: selectedColor ? 'pointer' : 'default',
+      }}
+      onClick={onColorClick}
     >
       {/* Fixed top section */}
       <div className="flex-shrink-0 px-4 pt-4 pb-2">

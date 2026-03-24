@@ -49,6 +49,10 @@ export default function App({ uid, onSignOut: signOut }: Props) {
     removeSticker,
     setCellColor,
     toggleDayCompletion,
+    bgColor,
+    sidebarColor,
+    setBgColor,
+    setSidebarColor,
   } = useCalendarData(uid);
 
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -67,6 +71,10 @@ export default function App({ uid, onSignOut: signOut }: Props) {
 
   const handleCalendarClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (stickerJustDragged.current) { stickerJustDragged.current = false; return; }
+    if (selectedColor && !selectedSticker) {
+      setBgColor(selectedColor === bgColor ? '' : selectedColor);
+      return;
+    }
     if (!selectedSticker || !calendarRef.current) return;
     const rect = calendarRef.current.getBoundingClientRect();
     const size = 90;
@@ -166,8 +174,9 @@ export default function App({ uid, onSignOut: signOut }: Props) {
       days.push(
         <div
           key={day.toString()}
-          onClick={() => {
+          onClick={(e) => {
             if (selectedColor) {
+              e.stopPropagation();
               setCellColor(dateStr, cellColors[dateStr] === selectedColor ? '' : selectedColor);
             }
           }}
@@ -255,7 +264,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
     <div 
       className="h-full overflow-hidden flex font-sans"
       style={{
-        backgroundColor: theme.bg,
+        backgroundColor: bgColor || theme.bg,
         color: theme.textPrimary
       }}
     >
@@ -265,6 +274,9 @@ export default function App({ uid, onSignOut: signOut }: Props) {
         onEditEvent={openEdit}
         showSchool={showSchool}
         onToggleSchool={() => setShowSchool((v) => !v)}
+        selectedColor={selectedColor}
+        bgColor={sidebarColor}
+        onColorClick={() => selectedColor && setSidebarColor(selectedColor === sidebarColor ? '' : selectedColor)}
       />
 
       {/* Main Calendar Area */}

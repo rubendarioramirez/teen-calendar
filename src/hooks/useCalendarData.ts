@@ -35,6 +35,8 @@ interface StickerDoc {
 interface AppStateDoc {
   cellColors: Record<string, string>;
   completedDays: Record<string, boolean>;
+  bgColor?: string;
+  sidebarColor?: string;
 }
 
 // All data lives under /users/{uid}/...
@@ -50,6 +52,8 @@ export function useCalendarData(uid: string) {
   const [stickers, setStickers] = useState<PlacedSticker[]>([]);
   const [cellColors, setCellColors] = useState<Record<string, string>>({});
   const [completedDays, setCompletedDays] = useState<Record<string, boolean>>({});
+  const [bgColor, setBgColorState] = useState<string>('');
+  const [sidebarColor, setSidebarColorState] = useState<string>('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -98,6 +102,8 @@ export function useCalendarData(uid: string) {
         const data = snap.data() as AppStateDoc;
         setCellColors(data.cellColors ?? {});
         setCompletedDays(data.completedDays ?? {});
+        setBgColorState(data.bgColor ?? '');
+        setSidebarColorState(data.sidebarColor ?? '');
       }
       stateReady = true;
       checkReady();
@@ -173,12 +179,24 @@ export function useCalendarData(uid: string) {
     });
   }, [uid]);
 
+  const setBgColor = useCallback((color: string) => {
+    setBgColorState(color);
+    setDoc(userDoc(uid, 'appState', 'main'), { bgColor: color }, { merge: true });
+  }, [uid]);
+
+  const setSidebarColor = useCallback((color: string) => {
+    setSidebarColorState(color);
+    setDoc(userDoc(uid, 'appState', 'main'), { sidebarColor: color }, { merge: true });
+  }, [uid]);
+
   return {
     loading,
     events,
     stickers,
     cellColors,
     completedDays,
+    bgColor,
+    sidebarColor,
     addEvent,
     updateEvent,
     deleteEvent,
@@ -187,5 +205,7 @@ export function useCalendarData(uid: string) {
     removeSticker,
     setCellColor,
     toggleDayCompletion,
+    setBgColor,
+    setSidebarColor,
   };
 }
