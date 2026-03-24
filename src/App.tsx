@@ -25,15 +25,17 @@ import { StickerPicker } from './components/StickerPicker';
 import { StickerLayer } from './components/StickerLayer';
 import { IconPicker } from './components/IconPicker';
 import { useCalendarData } from './hooks/useCalendarData';
-import { useAuth } from './hooks/useAuth';
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export default function App() {
-  const { user, signOut } = useAuth();
+interface Props {
+  uid: string;
+  onSignOut: () => void;
+}
 
+export default function App({ uid, onSignOut: signOut }: Props) {
   const {
     events,
     stickers,
@@ -47,7 +49,7 @@ export default function App() {
     removeSticker,
     setCellColor,
     toggleDayCompletion,
-  } = useCalendarData(user!.uid);
+  } = useCalendarData(uid);
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedColor, setSelectedColor] = useState<string | null>(null);

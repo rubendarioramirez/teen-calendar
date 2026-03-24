@@ -8,7 +8,7 @@ import './index.css';
 import './firebase';
 
 function Root() {
-  const { user, loading, signIn } = useAuth();
+  const { user, loading, signIn, signOut } = useAuth();
 
   if (loading) {
     return (
@@ -23,7 +23,7 @@ function Root() {
     return <LoginPage onSignIn={signIn} />;
   }
 
-  return <App />;
+  return <App uid={user.uid} onSignOut={signOut} />;
 }
 
 createRoot(document.getElementById('root')!).render(
