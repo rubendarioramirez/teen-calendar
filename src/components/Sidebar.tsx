@@ -32,7 +32,7 @@ export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleS
 
   return (
     <aside
-      className="w-64 flex-shrink-0 p-4 flex flex-col border-r backdrop-blur-md overflow-hidden"
+      className="w-64 flex-shrink-0 p-4 flex flex-col border-r backdrop-blur-md h-full overflow-hidden"
       style={{ backgroundColor: theme.sidebarBg, borderColor: theme.cellBorder }}
     >
       <h2
