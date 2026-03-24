@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { format, addDays, isSameDay, getWeek } from 'date-fns';
 import { ChevronLeft } from 'lucide-react';
 import type { Event } from '../types';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 type Props = {
   weekStart: Date;
@@ -20,6 +20,7 @@ function parseHours(time: string): number {
 }
 
 export function WeekView({ weekStart, events, onBack, onEditEvent }: Props) {
+  const theme = useTheme();
   const days = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const weekNumber = getWeek(weekStart, { weekStartsOn: 0 });
   const scrollRef = useRef<HTMLDivElement>(null);

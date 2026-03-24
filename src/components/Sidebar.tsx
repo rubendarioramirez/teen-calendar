@@ -1,11 +1,9 @@
 import { format } from 'date-fns';
-import { Plus } from 'lucide-react';
 import type { Event } from '../types';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 type Props = {
   events: Event[];
-  onAddEvent: () => void;
   onEditEvent: (event: Event) => void;
   showSchool: boolean;
   onToggleSchool: () => void;
@@ -28,7 +26,8 @@ function groupByDay(events: Event[]): { day: string; events: Event[] }[] {
     .map(([day, events]) => ({ day, events }));
 }
 
-export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleSchool, selectedColor, bgColor, onColorClick }: Props) {
+export function Sidebar({ events, onEditEvent, showSchool, onToggleSchool, selectedColor, bgColor, onColorClick }: Props) {
+  const theme = useTheme();
   const grouped = groupByDay(events);
 
   return (
@@ -96,17 +95,6 @@ export function Sidebar({ events, onAddEvent, onEditEvent, showSchool, onToggleS
         )}
       </div>
 
-      {/* Always-visible button pinned at bottom */}
-      <div className="flex-shrink-0 px-4 pb-4 pt-2">
-        <button
-          onClick={onAddEvent}
-          className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-transform hover:scale-105 active:scale-95"
-          style={{ backgroundColor: theme.accent, color: theme.bg }}
-        >
-          <Plus size={20} />
-          <span>Add Event</span>
-        </button>
-      </div>
     </aside>
   );
 }

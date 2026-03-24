@@ -1,7 +1,8 @@
 import { useRef, useState, useEffect } from 'react';
 import { Plus, Layers } from 'lucide-react';
 import { STICKER_IMAGES } from '../stickers';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
+import { removeWhiteBg } from '../utils/removeWhiteBg';
 
 const CUSTOM_KEY = 'matilda_custom_stickers';
 
@@ -16,12 +17,27 @@ type Props = {
 };
 
 export function StickerPicker({ selectedSticker, onSelect }: Props) {
+  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [custom, setCustom] = useState<string[]>(loadCustom);
+  const [processedSrcs, setProcessedSrcs] = useState<Record<string, string>>({});
+  const submittedSrcs = useRef(new Set<string>());
   const panelRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const all = [...STICKER_IMAGES, ...custom];
+
+  // Process white backgrounds for thumbnails
+  useEffect(() => {
+    for (const src of all) {
+      if (!submittedSrcs.current.has(src)) {
+        submittedSrcs.current.add(src);
+        removeWhiteBg(src).then((result) => {
+          setProcessedSrcs((prev) => ({ ...prev, [src]: result }));
+        });
+      }
+    }
+  }, [all.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Close on outside click
   useEffect(() => {
@@ -75,8 +91,8 @@ export function StickerPicker({ selectedSticker, onSelect }: Props) {
         <span className="text-sm font-semibold">Stickers</span>
         {selectedSticker && (
           <img
-            src={selectedSticker}
-            className="w-5 h-5 rounded-md object-cover"
+            src={processedSrcs[selectedSticker] ?? selectedSticker}
+            className="w-5 h-5 rounded-md object-contain"
           />
         )}
       </button>
@@ -107,9 +123,9 @@ export function StickerPicker({ selectedSticker, onSelect }: Props) {
                 title="Place sticker"
               >
                 <img
-                  src={src}
+                  src={processedSrcs[src] ?? src}
                   alt="sticker"
-                  className="w-12 h-12 object-cover rounded-xl"
+                  className="w-12 h-12 object-contain rounded-xl"
                   style={{
                     border: selectedSticker === src
                       ? `3px solid ${theme.accent}`

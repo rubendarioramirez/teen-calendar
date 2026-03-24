@@ -11,6 +11,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../firebase';
 import { type Event, type PlacedSticker, type RepeatType } from '../types';
+import { type ThemeName } from '../theme';
 
 // Firestore document shapes
 interface EventDoc {
@@ -37,6 +38,7 @@ interface AppStateDoc {
   completedDays: Record<string, boolean>;
   bgColor?: string;
   sidebarColor?: string;
+  themeName?: ThemeName;
 }
 
 // All data lives under /users/{uid}/...
@@ -54,6 +56,7 @@ export function useCalendarData(uid: string) {
   const [completedDays, setCompletedDays] = useState<Record<string, boolean>>({});
   const [bgColor, setBgColorState] = useState<string>('');
   const [sidebarColor, setSidebarColorState] = useState<string>('');
+  const [themeName, setThemeNameState] = useState<ThemeName>('midnight');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -104,6 +107,7 @@ export function useCalendarData(uid: string) {
         setCompletedDays(data.completedDays ?? {});
         setBgColorState(data.bgColor ?? '');
         setSidebarColorState(data.sidebarColor ?? '');
+        setThemeNameState((data.themeName as ThemeName) ?? 'midnight');
       }
       stateReady = true;
       checkReady();
@@ -189,6 +193,11 @@ export function useCalendarData(uid: string) {
     setDoc(userDoc(uid, 'appState', 'main'), { sidebarColor: color }, { merge: true });
   }, [uid]);
 
+  const setThemeName = useCallback((name: ThemeName) => {
+    setThemeNameState(name);
+    setDoc(userDoc(uid, 'appState', 'main'), { themeName: name }, { merge: true });
+  }, [uid]);
+
   return {
     loading,
     events,
@@ -207,5 +216,7 @@ export function useCalendarData(uid: string) {
     toggleDayCompletion,
     setBgColor,
     setSidebarColor,
+    themeName,
+    setThemeName,
   };
 }

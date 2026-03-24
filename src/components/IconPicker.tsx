@@ -1,5 +1,5 @@
 import { EVENT_ICONS } from '../eventIcons';
-import { theme } from '../theme';
+import { useTheme } from '../theme';
 
 type Props = {
   selected: string;
@@ -7,6 +7,7 @@ type Props = {
 };
 
 export function IconPicker({ selected, onSelect }: Props) {
+  const theme = useTheme();
   return (
     <div>
       <label className="block text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>

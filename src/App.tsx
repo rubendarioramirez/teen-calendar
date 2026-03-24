@@ -13,10 +13,10 @@ import {
   getWeek,
   isWithinInterval,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, Smile, X, Trash2, LogOut } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Smile, X, Trash2, LogOut, Plus } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { theme, PALETTE } from './theme';
+import { THEMES, ThemeContext, type ThemeName } from './theme';
 import { type Event, emptyForm } from './types';
 import { expandEvents, originalId } from './utils/expandEvents';
 import { Sidebar } from './components/Sidebar';
@@ -34,6 +34,12 @@ interface Props {
   uid: string;
   onSignOut: () => void;
 }
+
+const THEME_LABELS: Record<ThemeName, string> = {
+  midnight: '🌙',
+  petal: '🌸',
+  gothic: '🦇',
+};
 
 export default function App({ uid, onSignOut: signOut }: Props) {
   const {
@@ -53,7 +59,12 @@ export default function App({ uid, onSignOut: signOut }: Props) {
     sidebarColor,
     setBgColor,
     setSidebarColor,
+    themeName,
+    setThemeName,
   } = useCalendarData(uid);
+
+  // Active theme config — drives all colors
+  const theme = THEMES[themeName];
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
@@ -95,7 +106,6 @@ export default function App({ uid, onSignOut: signOut }: Props) {
   };
 
   const openEdit = (event: Event) => {
-    // For repeated occurrences, find and edit the original event
     const baseId = originalId(event.id);
     const original = events.find((e) => e.id === baseId) ?? event;
     setEditingId(baseId);
@@ -145,9 +155,8 @@ export default function App({ uid, onSignOut: signOut }: Props) {
   // Calendar logic
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
-  const startDate = startOfWeek(monthStart, { weekStartsOn: 0 }); // Week starts on Sunday
+  const startDate = startOfWeek(monthStart, { weekStartsOn: 0 });
   const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
-
   const weekNumber = getWeek(currentDate, { weekStartsOn: 0 });
 
   const visibleEvents = expandEvents(
@@ -212,7 +221,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
               />
             </button>
           </div>
-          
+
           <div className="flex-1 overflow-y-auto mt-1 space-y-1 no-scrollbar">
             {dayEvents.map((event) => (
               <div
@@ -261,323 +270,350 @@ export default function App({ uid, onSignOut: signOut }: Props) {
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
   return (
-    <div 
-      className="h-full overflow-hidden flex font-sans"
-      style={{
-        backgroundColor: bgColor || theme.bg,
-        color: theme.textPrimary
-      }}
-    >
-      <Sidebar
-        events={thisWeekEvents}
-        onAddEvent={openNew}
-        onEditEvent={openEdit}
-        showSchool={showSchool}
-        onToggleSchool={() => setShowSchool((v) => !v)}
-        selectedColor={selectedColor}
-        bgColor={sidebarColor}
-        onColorClick={() => selectedColor && setSidebarColor(selectedColor === sidebarColor ? '' : selectedColor)}
-      />
+    <ThemeContext.Provider value={theme}>
+      <div
+        className="h-full overflow-hidden flex font-sans"
+        style={{ backgroundColor: bgColor || theme.bg, color: theme.textPrimary }}
+      >
+        <Sidebar
+          events={thisWeekEvents}
+          onEditEvent={openEdit}
+          showSchool={showSchool}
+          onToggleSchool={() => setShowSchool((v) => !v)}
+          selectedColor={selectedColor}
+          bgColor={sidebarColor}
+          onColorClick={() => selectedColor && setSidebarColor(selectedColor === sidebarColor ? '' : selectedColor)}
+        />
 
-      {/* Main Calendar Area */}
-      <div className="flex-1 flex flex-col overflow-hidden min-h-0">
-        {view === 'week' && (
-          <WeekView
-            weekStart={startOfWeek(currentDate, { weekStartsOn: 0 })}
-            events={events}
-            onBack={() => setView('month')}
-            onEditEvent={openEdit}
-          />
-        )}
-        {view === 'month' && <>
-        {/* Header */}
-        <header className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0" style={{ borderColor: theme.cellBorder }}>
-          <div className="flex items-center space-x-4">
-            <button onClick={prevMonth} className="p-2 rounded-full hover:bg-white/10 transition-colors">
-              <ChevronLeft size={24} />
-            </button>
-            <h1 className="text-4xl font-black tracking-wider uppercase" style={{ color: theme.headerText, fontFamily: 'Champagne, sans-serif' }}>
-              {format(currentDate, 'MMMM')}
-            </h1>
-            <button onClick={nextMonth} className="p-2 rounded-full hover:bg-white/10 transition-colors">
-              <ChevronRight size={24} />
-            </button>
-          </div>
-          
-          <div className="flex items-center space-x-6">
-            <button
-              onClick={() => setView('week')}
-              className="text-right hover:opacity-70 transition-opacity"
-              title="Switch to week view"
-            >
-              <p className="text-sm uppercase tracking-widest font-semibold" style={{ color: theme.textSecondary }}>
-                Week
-              </p>
-              <p className="text-3xl font-black" style={{ color: theme.accent }}>
-                {weekNumber}
-              </p>
-            </button>
-            {/* Color Palette */}
-            <div className="flex items-center gap-1.5 flex-nowrap">
-              {PALETTE.map((color) => (
+        {/* Main Calendar Area */}
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+          {view === 'week' && (
+            <WeekView
+              weekStart={startOfWeek(currentDate, { weekStartsOn: 0 })}
+              events={events}
+              onBack={() => setView('month')}
+              onEditEvent={openEdit}
+            />
+          )}
+          {view === 'month' && <>
+          {/* Header */}
+          <header className="flex items-center justify-between px-6 py-3 border-b flex-shrink-0" style={{ borderColor: theme.cellBorder }}>
+            <div className="flex items-center space-x-4">
+              <button onClick={prevMonth} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+                <ChevronLeft size={24} />
+              </button>
+              <h1 className="text-4xl font-black tracking-wider uppercase" style={{ color: theme.headerText, fontFamily: 'Champagne, sans-serif' }}>
+                {format(currentDate, 'MMMM')}
+              </h1>
+              <button onClick={nextMonth} className="p-2 rounded-full hover:bg-white/10 transition-colors">
+                <ChevronRight size={24} />
+              </button>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              {/* Week # */}
+              <button
+                onClick={() => setView('week')}
+                className="text-right hover:opacity-70 transition-opacity"
+                title="Switch to week view"
+              >
+                <p className="text-sm uppercase tracking-widest font-semibold" style={{ color: theme.textSecondary }}>
+                  Week
+                </p>
+                <p className="text-3xl font-black" style={{ color: theme.accent }}>
+                  {weekNumber}
+                </p>
+              </button>
+
+              <div className="w-px self-stretch" style={{ backgroundColor: theme.cellBorder }} />
+
+              {/* Theme switcher */}
+              <div className="flex items-center gap-1.5">
+                {(Object.keys(THEMES) as ThemeName[]).map((t) => {
+                  const tc = THEMES[t];
+                  return (
+                    <button
+                      key={t}
+                      onClick={() => setThemeName(t)}
+                      title={t.charAt(0).toUpperCase() + t.slice(1)}
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-sm transition-transform hover:scale-110 active:scale-95"
+                      style={{
+                        background: `linear-gradient(135deg, ${tc.bg} 50%, ${tc.accent} 50%)`,
+                        border: themeName === t ? '2.5px solid white' : `2px solid rgba(255,255,255,0.2)`,
+                        boxShadow: themeName === t ? `0 0 10px ${tc.accent}` : 'none',
+                      }}
+                    >
+                      {THEME_LABELS[t]}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="w-px self-stretch" style={{ backgroundColor: theme.cellBorder }} />
+
+              {/* Color Palette */}
+              <div className="flex items-center gap-1.5 flex-nowrap">
+                {theme.palette.map((color: string) => (
+                  <button
+                    key={color}
+                    onClick={() => setSelectedColor((prev) => prev === color ? null : color)}
+                    title={color}
+                    className="transition-transform hover:scale-110 active:scale-95 flex-shrink-0"
+                    style={{
+                      width: 22,
+                      height: 22,
+                      borderRadius: '50%',
+                      backgroundColor: color,
+                      border: selectedColor === color ? '3px solid white' : '2px solid rgba(255,255,255,0.2)',
+                      boxShadow: selectedColor === color ? `0 0 8px ${color}` : 'none',
+                    }}
+                  />
+                ))}
+                {/* Eraser */}
                 <button
-                  key={color}
-                  onClick={() => setSelectedColor((prev) => prev === color ? null : color)}
-                  title={color}
-                  className="transition-transform hover:scale-110 active:scale-95 flex-shrink-0"
+                  onClick={() => setSelectedColor(null)}
+                  title="Deselect"
+                  className="transition-transform hover:scale-110 active:scale-95 flex items-center justify-center text-xs font-bold flex-shrink-0"
                   style={{
                     width: 22,
                     height: 22,
                     borderRadius: '50%',
-                    backgroundColor: color,
-                    border: selectedColor === color ? '3px solid white' : '2px solid rgba(255,255,255,0.2)',
-                    boxShadow: selectedColor === color ? `0 0 8px ${color}` : 'none',
-                  }}
-                />
-              ))}
-              {/* Eraser */}
-              <button
-                onClick={() => setSelectedColor(null)}
-                title="Deselect"
-                className="transition-transform hover:scale-110 active:scale-95 flex items-center justify-center text-xs font-bold flex-shrink-0"
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                  border: selectedColor === null ? '3px solid white' : '2px solid rgba(255,255,255,0.2)',
-                  color: theme.textSecondary,
-                }}
-              >
-                ✕
-              </button>
-            </div>
-            <div
-              className="w-px self-stretch mx-1"
-              style={{ backgroundColor: theme.cellBorder }}
-            />
-            <StickerPicker
-              selectedSticker={selectedSticker}
-              onSelect={setSelectedSticker}
-            />
-            <div
-              className="w-px self-stretch mx-1"
-              style={{ backgroundColor: theme.cellBorder }}
-            />
-            <button
-              onClick={signOut}
-              title="Sign out"
-              className="p-2 rounded-full hover:bg-white/10 transition-colors"
-            >
-              <LogOut size={20} style={{ color: theme.textSecondary }} />
-            </button>
-          </div>
-        </header>
-
-        {/* Calendar Grid */}
-        <div
-          ref={calendarRef}
-          className="flex-1 flex flex-col p-3 overflow-hidden relative min-h-0"
-          onClick={handleCalendarClick}
-          style={{ cursor: selectedSticker ? 'crosshair' : 'default' }}
-        >
-          <StickerLayer
-            stickers={stickers.filter((s) => (s.month ?? format(currentDate, 'yyyy-MM')) === format(currentDate, 'yyyy-MM'))}
-            onMove={moveSticker}
-            onRemove={removeSticker}
-            onDragStart={() => { stickerJustDragged.current = true; }}
-          />
-          {/* Days of week header */}
-          <div className="grid grid-cols-7 mb-1 flex-shrink-0">
-            {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-              <div
-                key={day}
-                className="text-center font-bold text-sm uppercase tracking-wider"
-                style={{ color: theme.textSecondary }}
-              >
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Calendar Body */}
-          <div
-            className="flex-1 flex flex-col border rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm min-h-0"
-            style={{ borderColor: theme.cellBorder }}
-          >
-            {rows}
-          </div>
-        </div>
-        </>}
-      </div>
-
-      {/* Event Modal (create & edit) */}
-      {modalOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div
-            className="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
-            style={{ backgroundColor: theme.modalBg, border: `1px solid ${theme.cellBorder}` }}
-          >
-            <div className="flex justify-between items-center p-6 border-b" style={{ borderColor: theme.cellBorder }}>
-              <h3 className="text-xl font-bold" style={{ color: theme.headerText }}>
-                {editingId ? 'Edit Event' : 'New Event'}
-              </h3>
-              <button onClick={closeModal} className="p-1 rounded-full hover:bg-white/10 transition-colors">
-                <X size={20} style={{ color: theme.textSecondary }} />
-              </button>
-            </div>
-
-            <form onSubmit={handleSave} className="p-6 space-y-4">
-              {/* Title */}
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
-                  Event Title
-                </label>
-                <input
-                  type="text"
-                  required
-                  autoFocus
-                  value={form.title}
-                  onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  placeholder="e.g. Math homework"
-                  className="w-full px-4 py-3 rounded-xl outline-none transition-shadow"
-                  style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}` }}
-                />
-              </div>
-
-              {/* School toggle + Repeat — same row */}
-              <div className="flex items-center gap-3">
-                {/* School checkbox */}
-                <button
-                  type="button"
-                  onClick={() => setForm((f) => ({ ...f, isSchool: !f.isSchool }))}
-                  className="flex items-center gap-2 flex-1 px-3 py-2 rounded-xl transition-all"
-                  style={{
-                    border: `1px solid ${form.isSchool ? theme.sticker : theme.cellBorder}`,
-                    backgroundColor: form.isSchool ? 'rgba(100,180,196,0.15)' : 'transparent',
-                    color: form.isSchool ? theme.sticker : theme.textSecondary,
+                    backgroundColor: 'rgba(255,255,255,0.1)',
+                    border: selectedColor === null ? '3px solid white' : '2px solid rgba(255,255,255,0.2)',
+                    color: theme.textSecondary,
                   }}
                 >
-                  <span className="text-lg">🏫</span>
-                  <span className="text-sm font-semibold">School</span>
+                  ✕
                 </button>
-
-                {/* Repeat */}
-                <div className="flex-1">
-                  <select
-                    value={form.repeat}
-                    onChange={(e) => setForm((f) => ({ ...f, repeat: e.target.value as typeof f.repeat }))}
-                    className="w-full px-3 py-2 rounded-xl outline-none text-sm"
-                    style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}`, colorScheme: 'dark' }}
-                  >
-                    <option value="none">No repeat</option>
-                    <option value="daily">Every day</option>
-                    <option value="weekly">Every week</option>
-                    <option value="monthly">Every month</option>
-                    <option value="yearly">Every year</option>
-                  </select>
-                </div>
               </div>
 
-              {/* Date */}
-              <div>
-                <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>Date</label>
-                <input
-                  type="date"
-                  required
-                  value={form.date}
-                  onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl outline-none transition-shadow"
-                  style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}`, colorScheme: 'dark' }}
-                />
-              </div>
+              <div className="w-px self-stretch" style={{ backgroundColor: theme.cellBorder }} />
 
-              {/* Times */}
-              <div className="flex gap-3">
-                <div className="flex-1">
-                  <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>Start time</label>
-                  <input
-                    type="time"
-                    value={form.startTime}
-                    onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl outline-none"
-                    style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}`, colorScheme: 'dark' }}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
-                    End time <span className="opacity-50">(optional)</span>
-                  </label>
-                  <input
-                    type="time"
-                    value={form.endTime}
-                    onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
-                    className="w-full px-4 py-3 rounded-xl outline-none"
-                    style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}`, colorScheme: 'dark' }}
-                  />
-                </div>
-              </div>
-
-              {/* Color picker */}
-              <div>
-                <label className="block text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Color</label>
-                <div className="flex flex-wrap gap-2">
-                  {PALETTE.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, color: f.color === color ? '' : color }))}
-                      style={{
-                        width: 28, height: 28, borderRadius: '50%',
-                        backgroundColor: color,
-                        border: form.color === color ? '3px solid white' : '2px solid rgba(255,255,255,0.2)',
-                        boxShadow: form.color === color ? `0 0 8px ${color}` : 'none',
-                      }}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              {/* Icon picker */}
-              <IconPicker
-                selected={form.icon}
-                onSelect={(emoji) => setForm((f) => ({ ...f, icon: emoji }))}
+              <StickerPicker
+                selectedSticker={selectedSticker}
+                onSelect={setSelectedSticker}
               />
 
-              {/* Actions */}
-              <div className="pt-2 flex gap-3">
-                {editingId && (
-                  <button
-                    type="button"
-                    onClick={handleDelete}
-                    className="p-3 rounded-xl transition-colors hover:bg-red-500/20"
-                    style={{ color: '#f87171' }}
-                    title="Delete event"
-                  >
-                    <Trash2 size={20} />
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="flex-1 py-3 rounded-xl font-semibold transition-colors hover:bg-white/5"
+              <div className="w-px self-stretch" style={{ backgroundColor: theme.cellBorder }} />
+
+              <button
+                onClick={signOut}
+                title="Sign out"
+                className="p-2 rounded-full hover:bg-white/10 transition-colors"
+              >
+                <LogOut size={20} style={{ color: theme.textSecondary }} />
+              </button>
+            </div>
+          </header>
+
+          {/* Calendar Grid */}
+          <div
+            ref={calendarRef}
+            className="flex-1 flex flex-col p-3 overflow-hidden relative min-h-0"
+            onClick={handleCalendarClick}
+            style={{ cursor: selectedSticker ? 'crosshair' : 'default' }}
+          >
+            <StickerLayer
+              stickers={stickers.filter((s) => (s.month ?? format(currentDate, 'yyyy-MM')) === format(currentDate, 'yyyy-MM'))}
+              onMove={moveSticker}
+              onRemove={removeSticker}
+              onDragStart={() => { stickerJustDragged.current = true; }}
+            />
+            {/* Days of week header */}
+            <div className="grid grid-cols-7 mb-1 flex-shrink-0">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
+                <div
+                  key={d}
+                  className="text-center font-bold text-sm uppercase tracking-wider"
                   style={{ color: theme.textSecondary }}
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 py-3 rounded-xl font-bold transition-transform hover:scale-105 active:scale-95"
-                  style={{ backgroundColor: form.color || theme.accent, color: theme.bg }}
-                >
-                  {editingId ? 'Save Changes' : 'Save Event'}
+                  {d}
+                </div>
+              ))}
+            </div>
+
+            {/* Calendar Body */}
+            <div
+              className="flex-1 flex flex-col border rounded-xl overflow-hidden shadow-2xl backdrop-blur-sm min-h-0"
+              style={{ borderColor: theme.cellBorder }}
+            >
+              {rows}
+            </div>
+
+            {/* FAB — Add Event */}
+            <button
+              onClick={(e: React.MouseEvent) => { e.stopPropagation(); openNew(); }}
+              className="absolute bottom-6 right-6 z-40 w-14 h-14 rounded-full flex items-center justify-center transition-transform hover:scale-110 active:scale-95"
+              style={{
+                backgroundColor: theme.accent,
+                color: theme.bg,
+                boxShadow: `0 4px 20px ${theme.accent}99`,
+              }}
+              title="Add Event"
+            >
+              <Plus size={28} />
+            </button>
+          </div>
+          </>}
+        </div>
+
+        {/* Event Modal */}
+        {modalOpen && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div
+              className="w-full max-w-md rounded-2xl shadow-2xl overflow-hidden"
+              style={{ backgroundColor: theme.modalBg, border: `1px solid ${theme.cellBorder}` }}
+            >
+              <div className="flex justify-between items-center p-6 border-b" style={{ borderColor: theme.cellBorder }}>
+                <h3 className="text-xl font-bold" style={{ color: theme.headerText }}>
+                  {editingId ? 'Edit Event' : 'New Event'}
+                </h3>
+                <button onClick={closeModal} className="p-1 rounded-full hover:bg-white/10 transition-colors">
+                  <X size={20} style={{ color: theme.textSecondary }} />
                 </button>
               </div>
-            </form>
+
+              <form onSubmit={handleSave} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
+                    Event Title
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    autoFocus
+                    value={form.title}
+                    onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                    placeholder="e.g. Math homework"
+                    className="w-full px-4 py-3 rounded-xl outline-none transition-shadow"
+                    style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}` }}
+                  />
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, isSchool: !f.isSchool }))}
+                    className="flex items-center gap-2 flex-1 px-3 py-2 rounded-xl transition-all"
+                    style={{
+                      border: `1px solid ${form.isSchool ? theme.sticker : theme.cellBorder}`,
+                      backgroundColor: form.isSchool ? 'rgba(100,180,196,0.15)' : 'transparent',
+                      color: form.isSchool ? theme.sticker : theme.textSecondary,
+                    }}
+                  >
+                    <span className="text-lg">🏫</span>
+                    <span className="text-sm font-semibold">School</span>
+                  </button>
+                  <div className="flex-1">
+                    <select
+                      value={form.repeat}
+                      onChange={(e) => setForm((f) => ({ ...f, repeat: e.target.value as typeof f.repeat }))}
+                      className="w-full px-3 py-2 rounded-xl outline-none text-sm"
+                      style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}`, colorScheme: 'dark' }}
+                    >
+                      <option value="none">No repeat</option>
+                      <option value="daily">Every day</option>
+                      <option value="weekly">Every week</option>
+                      <option value="monthly">Every month</option>
+                      <option value="yearly">Every year</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>Date</label>
+                  <input
+                    type="date"
+                    required
+                    value={form.date}
+                    onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+                    className="w-full px-4 py-3 rounded-xl outline-none transition-shadow"
+                    style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}`, colorScheme: 'dark' }}
+                  />
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>Start time</label>
+                    <input
+                      type="time"
+                      value={form.startTime}
+                      onChange={(e) => setForm((f) => ({ ...f, startTime: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl outline-none"
+                      style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}`, colorScheme: 'dark' }}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1" style={{ color: theme.textSecondary }}>
+                      End time <span className="opacity-50">(optional)</span>
+                    </label>
+                    <input
+                      type="time"
+                      value={form.endTime}
+                      onChange={(e) => setForm((f) => ({ ...f, endTime: e.target.value }))}
+                      className="w-full px-4 py-3 rounded-xl outline-none"
+                      style={{ backgroundColor: theme.cellBg, color: theme.textPrimary, border: `1px solid ${theme.cellBorder}`, colorScheme: 'dark' }}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2" style={{ color: theme.textSecondary }}>Color</label>
+                  <div className="flex flex-wrap gap-2">
+                    {theme.palette.map((color: string) => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => setForm((f) => ({ ...f, color: f.color === color ? '' : color }))}
+                        style={{
+                          width: 28, height: 28, borderRadius: '50%',
+                          backgroundColor: color,
+                          border: form.color === color ? '3px solid white' : '2px solid rgba(255,255,255,0.2)',
+                          boxShadow: form.color === color ? `0 0 8px ${color}` : 'none',
+                        }}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <IconPicker
+                  selected={form.icon}
+                  onSelect={(emoji) => setForm((f) => ({ ...f, icon: emoji }))}
+                />
+
+                <div className="pt-2 flex gap-3">
+                  {editingId && (
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      className="p-3 rounded-xl transition-colors hover:bg-red-500/20"
+                      style={{ color: '#f87171' }}
+                      title="Delete event"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="flex-1 py-3 rounded-xl font-semibold transition-colors hover:bg-white/5"
+                    style={{ color: theme.textSecondary }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 rounded-xl font-bold transition-transform hover:scale-105 active:scale-95"
+                    style={{ backgroundColor: form.color || theme.accent, color: theme.bg }}
+                  >
+                    {editingId ? 'Save Changes' : 'Save Event'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+    </ThemeContext.Provider>
   );
 }
-
