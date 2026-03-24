@@ -18,7 +18,7 @@ export function LoginPage({ onSignIn }: Props) {
           Matilda's Calendar
         </h1>
         <p className="text-lg" style={{ color: theme.textSecondary }}>
-          Plan your week, your way ✨
+          Your week, your style ✨
         </p>
       </div>
 
