@@ -305,16 +305,16 @@ export default function App({ uid, onSignOut: signOut }: Props) {
               </p>
             </button>
             {/* Color Palette */}
-            <div className="flex items-center gap-2 flex-wrap max-w-[220px]">
+            <div className="flex items-center gap-1.5 flex-nowrap">
               {PALETTE.map((color) => (
                 <button
                   key={color}
                   onClick={() => setSelectedColor((prev) => prev === color ? null : color)}
                   title={color}
-                  className="transition-transform hover:scale-110 active:scale-95"
+                  className="transition-transform hover:scale-110 active:scale-95 flex-shrink-0"
                   style={{
-                    width: 28,
-                    height: 28,
+                    width: 22,
+                    height: 22,
                     borderRadius: '50%',
                     backgroundColor: color,
                     border: selectedColor === color ? '3px solid white' : '2px solid rgba(255,255,255,0.2)',
@@ -326,10 +326,10 @@ export default function App({ uid, onSignOut: signOut }: Props) {
               <button
                 onClick={() => setSelectedColor(null)}
                 title="Deselect"
-                className="transition-transform hover:scale-110 active:scale-95 flex items-center justify-center text-xs font-bold"
+                className="transition-transform hover:scale-110 active:scale-95 flex items-center justify-center text-xs font-bold flex-shrink-0"
                 style={{
-                  width: 28,
-                  height: 28,
+                  width: 22,
+                  height: 22,
                   borderRadius: '50%',
                   backgroundColor: 'rgba(255,255,255,0.1)',
                   border: selectedColor === null ? '3px solid white' : '2px solid rgba(255,255,255,0.2)',
@@ -375,7 +375,7 @@ export default function App({ uid, onSignOut: signOut }: Props) {
             onDragStart={() => { stickerJustDragged.current = true; }}
           />
           {/* Days of week header */}
-          <div className="grid grid-cols-7 mb-2">
+          <div className="grid grid-cols-7 mb-1 flex-shrink-0">
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div
                 key={day}
