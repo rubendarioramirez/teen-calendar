@@ -2,9 +2,10 @@ import { theme } from '../theme';
 
 interface Props {
   onSignIn: () => void;
+  error: string | null;
 }
 
-export function LoginPage({ onSignIn }: Props) {
+export function LoginPage({ onSignIn, error }: Props) {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center gap-8"
@@ -34,6 +35,15 @@ export function LoginPage({ onSignIn }: Props) {
         <GoogleIcon />
         Sign in with Google
       </button>
+
+      {error && (
+        <p
+          className="text-sm text-center max-w-sm px-4 py-2 rounded-xl"
+          style={{ backgroundColor: 'rgba(248,113,113,0.15)', color: '#f87171' }}
+        >
+          {error}
+        </p>
+      )}
     </div>
   );
 }

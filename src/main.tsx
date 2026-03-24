@@ -8,7 +8,7 @@ import './index.css';
 import './firebase';
 
 function Root() {
-  const { user, loading, signIn, signOut } = useAuth();
+  const { user, loading, error, signIn, signOut } = useAuth();
 
   if (loading) {
     return (
@@ -20,7 +20,7 @@ function Root() {
   }
 
   if (!user) {
-    return <LoginPage onSignIn={signIn} />;
+    return <LoginPage onSignIn={signIn} error={error} />;
   }
 
   return <App uid={user.uid} onSignOut={signOut} />;
