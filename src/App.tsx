@@ -32,6 +32,8 @@ function cn(...inputs: ClassValue[]) {
 }
 
 export default function App() {
+  const { user, signOut } = useAuth();
+
   const {
     events,
     stickers,
@@ -45,9 +47,7 @@ export default function App() {
     removeSticker,
     setCellColor,
     toggleDayCompletion,
-  } = useCalendarData();
-
-  const { signOut } = useAuth();
+  } = useCalendarData(user!.uid);
 
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedColor, setSelectedColor] = useState<string | null>(null);

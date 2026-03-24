@@ -37,7 +37,15 @@ interface AppStateDoc {
   completedDays: Record<string, boolean>;
 }
 
-export function useCalendarData() {
+// All data lives under /users/{uid}/...
+function userCol(uid: string, name: string) {
+  return collection(db, 'users', uid, name);
+}
+function userDoc(uid: string, name: string, id: string) {
+  return doc(db, 'users', uid, name, id);
+}
+
+export function useCalendarData(uid: string) {
   const [events, setEvents] = useState<Event[]>([]);
   const [stickers, setStickers] = useState<PlacedSticker[]>([]);
   const [cellColors, setCellColors] = useState<Record<string, string>>({});
@@ -53,7 +61,7 @@ export function useCalendarData() {
       if (eventsReady && stickersReady && stateReady) setLoading(false);
     };
 
-    const unsubEvents = onSnapshot(collection(db, 'events'), (snap) => {
+    const unsubEvents = onSnapshot(userCol(uid, 'events'), (snap) => {
       setEvents(
         snap.docs.map((d) => {
           const data = d.data() as EventDoc;
@@ -74,7 +82,7 @@ export function useCalendarData() {
       checkReady();
     });
 
-    const unsubStickers = onSnapshot(collection(db, 'stickers'), (snap) => {
+    const unsubStickers = onSnapshot(userCol(uid, 'stickers'), (snap) => {
       setStickers(
         snap.docs.map((d) => {
           const data = d.data() as StickerDoc;
@@ -85,7 +93,7 @@ export function useCalendarData() {
       checkReady();
     });
 
-    const unsubState = onSnapshot(doc(db, 'appState', 'main'), (snap) => {
+    const unsubState = onSnapshot(userDoc(uid, 'appState', 'main'), (snap) => {
       if (snap.exists()) {
         const data = snap.data() as AppStateDoc;
         setCellColors(data.cellColors ?? {});
@@ -100,11 +108,11 @@ export function useCalendarData() {
       unsubStickers();
       unsubState();
     };
-  }, []);
+  }, [uid]);
 
   // --- Event mutations ---
   const addEvent = useCallback(async (ev: Omit<Event, 'id'>) => {
-    const doc: EventDoc = {
+    const data: EventDoc = {
       title: ev.title,
       date: Timestamp.fromDate(ev.date),
       ...(ev.startTime && { startTime: ev.startTime }),
@@ -114,8 +122,8 @@ export function useCalendarData() {
       ...(ev.isSchool && { isSchool: ev.isSchool }),
       ...(ev.repeat && ev.repeat !== 'none' && { repeat: ev.repeat }),
     };
-    await addDoc(collection(db, 'events'), doc);
-  }, []);
+    await addDoc(userCol(uid, 'events'), data);
+  }, [uid]);
 
   const updateEvent = useCallback(async (id: string, ev: Omit<Event, 'id'>) => {
     const data: Partial<EventDoc> = {
@@ -128,42 +136,42 @@ export function useCalendarData() {
       isSchool: ev.isSchool ?? false,
       repeat: ev.repeat ?? 'none',
     };
-    await updateDoc(doc(db, 'events', id), data as Record<string, unknown>);
-  }, []);
+    await updateDoc(userDoc(uid, 'events', id), data as Record<string, unknown>);
+  }, [uid]);
 
   const deleteEvent = useCallback(async (id: string) => {
-    await deleteDoc(doc(db, 'events', id));
-  }, []);
+    await deleteDoc(userDoc(uid, 'events', id));
+  }, [uid]);
 
   // --- Sticker mutations ---
   const addSticker = useCallback(async (sticker: Omit<PlacedSticker, 'id'>) => {
-    await addDoc(collection(db, 'stickers'), sticker);
-  }, []);
+    await addDoc(userCol(uid, 'stickers'), sticker);
+  }, [uid]);
 
   const moveSticker = useCallback(async (id: string, x: number, y: number) => {
-    await updateDoc(doc(db, 'stickers', id), { x, y });
-  }, []);
+    await updateDoc(userDoc(uid, 'stickers', id), { x, y });
+  }, [uid]);
 
   const removeSticker = useCallback(async (id: string) => {
-    await deleteDoc(doc(db, 'stickers', id));
-  }, []);
+    await deleteDoc(userDoc(uid, 'stickers', id));
+  }, [uid]);
 
   // --- App state mutations ---
   const setCellColor = useCallback(async (dateStr: string, color: string) => {
     setCellColors((prev) => {
       const next = { ...prev, [dateStr]: color };
-      setDoc(doc(db, 'appState', 'main'), { cellColors: next }, { merge: true });
+      setDoc(userDoc(uid, 'appState', 'main'), { cellColors: next }, { merge: true });
       return next;
     });
-  }, []);
+  }, [uid]);
 
   const toggleDayCompletion = useCallback(async (dateStr: string) => {
     setCompletedDays((prev) => {
       const next = { ...prev, [dateStr]: !prev[dateStr] };
-      setDoc(doc(db, 'appState', 'main'), { completedDays: next }, { merge: true });
+      setDoc(userDoc(uid, 'appState', 'main'), { completedDays: next }, { merge: true });
       return next;
     });
-  }, []);
+  }, [uid]);
 
   return {
     loading,
